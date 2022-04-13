@@ -1,28 +1,40 @@
 from pyparsing import White
 from manim import *
 import numpy as np
-class CreateCircle(Scene):
-    def construct(self):
-        circle = Circle()  # create a circle
-        circle.set_fill(PINK, opacity=0.5)  # set the color and transparency
-        self.play(Create(circle))  # show the circle on screen
-
-class Multi(Scene):
-    def construct(self):
+class ShowVectorF(Scene):#Shows the vector field on graph
+    def construct(self, n):
+        # eq = MathTex(r"\vec{F}=<y,x>", font_size=50)
+        # eq.shift(3*UP)
+        # self.add(eq)
         func = lambda pos: pos[0]*UP+pos[1]*RIGHT
         vector_field = ArrowVectorField(
             func, x_range=[-4, 4, 1], y_range=[-4, 4, 1], length_func=lambda x: x/4, colors=[YELLOW],stroke_width=1
         )
+        vector_field.scale(0.75)
         self.add(vector_field)
         nplane=NumberPlane(x_range=[-4, 4, 1], y_range=[-4, 4, 1])
+        nplane.scale(0.75)
         self.add(nplane)
-        circle = Circle(radius=2).shift(LEFT)
-        cop = circle.copy().set_color(GREY)
-        dot = Dot().shift(LEFT)
-        vector_field.nudge(dot, -2, 60)
-        dot.add_updater(vector_field.get_nudge_updater())
-        self.add(dot)
-        self.wait(4)
-        # rtarrow1 = Tex(r"$\xrightarrow{x^6y^8}$", font_size=96)
-        # self.add(VGroup(rtarrow1).arrange(DOWN))
-
+        self.wait(n)
+        self.remove(*nplane)
+        self.remove(*vector_field)
+        # self.remove(*eq)
+class VectorF(Scene):#Shows vector field equation
+    def construct(self,n):
+        eq = MathTex(r"\vec{F}=<y,x>", font_size=96)
+        eq.shift(RIGHT)
+        self.add(eq)
+        self.wait(n)
+        self.remove(*eq)
+class Multi(Scene):
+    def construct(self):
+        VectorF.construct(self,2)
+        ShowVectorF.construct(self,1)
+        tex = Tex("A vector F is conservative if....",font_size=50)
+        self.play(FadeIn(tex))
+        self.wait(1)
+        ntex = Tex(r"$\exists$ a function f such that $\nabla f=\vec{F}$",font_size=50)
+        self.play(FadeTransform(tex,ntex), stretch=True)
+        self.wait(1)
+        self.remove(*tex)
+        self.remove(*ntex)
