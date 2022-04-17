@@ -1,31 +1,22 @@
 from pyparsing import White
 from manim import *
 import numpy as np
-class ShowVectorF(Scene):#Shows the vector field on graph
-    def construct(self, n):
-        # eq = MathTex(r"\vec{F}=<y,x>", font_size=50)
-        # eq.shift(3*UP)
-        # self.add(eq)
-        func = lambda pos: pos[0]*UP+pos[1]*RIGHT
-        vector_field = ArrowVectorField(
-            func, x_range=[-4, 4, 1], y_range=[-4, 4, 1], length_func=lambda x: x/4, colors=[YELLOW],stroke_width=1
-        )
-        vector_field.scale(0.75)
-        self.add(vector_field)
-        nplane=NumberPlane(x_range=[-4, 4, 1], y_range=[-4, 4, 1])
-        nplane.scale(0.75)
-        self.add(nplane)
-        self.wait(n)
-        self.remove(*nplane)
-        self.remove(*vector_field)
-        # self.remove(*eq)
-class VectorF(Scene):#Shows vector field equation
-    def construct(self,n):
-        eq = MathTex(r"\vec{F}=<y,x>", font_size=96)
-        eq.shift(RIGHT)
-        self.add(eq)
-        self.wait(n)
-        self.remove(*eq)
+class ConsVec(Scene):#Animation for how potential difference is constant regardless of path over a conservative vector field
+    def construct(self):
+        plane=NumberPlane()
+        dot = Dot(-2*RIGHT+2*UP,color=YELLOW)
+        self.add(plane)
+        self.add(dot)
+        v_shift = Vector(RIGHT*0.1-UP*0.1, color=WHITE,stroke_width=1).move_to(np.array([-1.5,1.5,0]))
+        self.add(v_shift)
+        for t in np.arange(0,1,0.1):
+            dotp = dot.get_center()
+            dotp[0]=dotp[0]+0.1
+            dotp[1]=dotp[1]-0.1
+            ndot = Dot(dotp)
+            self.play(dot.animate.move_to(ndot),run_time = 0.5)
+            self.play(v_shift.animate.move_to(np.array([dotp[0]+0.1/2,dotp[1]-0.1/2,0])), run_time=0.5)
+
 class Multi(Scene):
     def construct(self):
         tex1 = Tex("A vector field F is conservative if....",font_size=50)
@@ -70,7 +61,7 @@ class Multi(Scene):
         tex12 = Tex(r"How about the case where the vector field F is 3 dimensional? How do we figure out if its conservative?", color=YELLOW,font_size=25)
         self.play(Write(tex12))
         self.play(tex12.animate.shift(2*UP))
-        self.wait(0.5)
+        self.wait(1)
         tex13 = Tex(r"To solve this conundrum, we introduce a new operator called curl", font_size=25)
         self.play(Write(tex13))
         self.play(tex13.animate.shift(UP))
@@ -81,17 +72,21 @@ class Multi(Scene):
         tex15 = Tex(r"curl $\vec{F} = \begin{bmatrix} \hat{i} & \hat{j} & \hat{k}\\ \frac{\partial}{\partial x} & \frac{\partial}{\partial y} & \frac{\partial}{\partial z}\\ F_{x} & F_{y} & F_{z} \end{bmatrix}$")
         self.play(Create(tex14))
         self.play(tex14.animate.shift(2*UP))
-        self.play(Write(tex15))
         self.wait(1)
+        self.play(Write(tex15))
+        self.wait(2)
         self.play(Uncreate(tex14))
         self.play(tex15.animate.shift(2*UP))
         tex16 = Tex(r"So curl $\vec{F} = (\frac{\partial F_{z}}{\partial y} - \frac{\partial F_{y}}{\partial z}) \hat{i} + (\frac{\partial F_{x}}{\partial z} - \frac{\partial F_{z}}{\partial x}) \hat{j} + (\frac{\partial F_{y}}{\partial x} - \frac{\partial F_{x}}{\partial y}) \hat{k}$")
         self.play(Write(tex16))
+        self.wait(1)
         tex17 = Tex(r"We say that $\vec{F}$ is conservative if the curl $\vec{F}$ is $\vec{0}$").shift(DOWN)
         self.play(Write(tex17))
+        self.wait(0.5)
         self.play(Uncreate(tex17))
         self.play(FadeOut(tex15))
         tex18 = Tex(r"curl $\vec{F} = (\frac{\partial F_{z}}{\partial y} - \frac{\partial F_{y}}{\partial z}) \hat{i} + (\frac{\partial F_{x}}{\partial z} - \frac{\partial F_{z}}{\partial x}) \hat{j} + (\frac{\partial F_{y}}{\partial x} - \frac{\partial F_{x}}{\partial y}) \hat{k}$")
+        self.wait(3)
         self.play(FadeTransform(tex16,tex18))
         self.play(tex18.animate.shift(2*UP))
         tex19 = Tex(r"If curl $\vec{F}=\vec{0}$ then:").shift(UP)
@@ -100,10 +95,13 @@ class Multi(Scene):
         tex21 = Tex(r"$\frac{\partial F_{z}}{\partial x}=\frac{\partial F_{x}}{\partial z}$")
         tex22 = Tex(r"$\frac{\partial F_{y}}{\partial x}=\frac{\partial F_{x}}{\partial y}$")
         self.play(Write(tex20))
+        self.wait(1)
         self.play(tex20.animate.shift(2*DOWN))
         self.play(Write(tex21))
+        self.wait(1)
         self.play(tex21.animate.shift(DOWN))
         self.play(Write(tex22))
+        self.wait(1)
         tgroup2 = [tex19,tex20,tex21,tex22]
         vgroup2 = VGroup(*tgroup2)
         self.play(Uncreate(tex18))
@@ -116,8 +114,11 @@ class Multi(Scene):
         tex27 = Tex(r"$\frac{\partial f}{\partial y \partial z}=\frac{\partial f}{\partial z \partial y}$").shift(3*RIGHT+2*DOWN)
         self.play(FadeIn(tex24))
         self.play(Write(tex25))
+        self.wait(1)
         self.play(Write(tex26))
+        self.wait(1)
         self.play(Write(tex27))
+        self.wait(1)
         tgroup3 = [tex23, tex20, tex21, tex22, tex19, tex24,tex25,tex26,tex27]
         vgroup3 = VGroup(*tgroup3)
         self.play(FadeOut(vgroup3))
@@ -127,7 +128,9 @@ class Multi(Scene):
         self.play(FadeIn(tex28))
         self.play(tex28.animate.shift(UP))
         self.play(Write(tex29))
+        self.wait(1)
         self.play(Write(tex30))
+        self.wait(1)
         tgroup4 = [tex28,tex29,tex30]
         vgroup4 = VGroup(*tgroup4)
         self.play(FadeOut(vgroup4))
@@ -138,8 +141,11 @@ class Multi(Scene):
         tex33 = Tex(r"and for any conservative vector field $\vec{F}$ where $\nabla f=\vec{F}$,")
         tex34 = Tex(r"The line integral $\int_{P} \vec{F} \cdot \vec{dr}=f(p_{2})-f(p_{1})$").shift(DOWN)
         self.play(Write(tex32))
+        self.wait(1)
         self.play(Write(tex33))
+        self.wait(1)
         self.play(Write(tex34))
+        self.wait(1)
         
 
 
