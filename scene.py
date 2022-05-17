@@ -1,6 +1,7 @@
 from pyparsing import White
 from manim import *
 import numpy as np
+import math
 # let F(x,y)=<y,x>
 class ConsVec(Scene):#Animation for how potential difference is constant regardless of path over a conservative vector field
     def construct(self):
@@ -62,7 +63,10 @@ class ConsVec(Scene):#Animation for how potential difference is constant regardl
         tex4=Tex(r"$\int_{(-2,2)_{p_{2}}}^{(0,0)} \vec{F} dr = 0$",font_size=50).shift(2*RIGHT)
         dot.move_to(np.array([-1-3.5,1,0]))
         self.wait(3)
-        self.play(MoveAlongPath(dot, arc1), run_time=3)
+        vec2 = VMobject()
+        vec2.add_updater(lambda x:x.become(Vector(np.array([dot.get_center()[1],dot.get_center()[0]+3.5])).set_color(BLUE).move_to(np.array([dot.get_center()[0]+dot.get_center()[1]/2,dot.get_center()[1]+dot.get_center()[0]/2+7/4,0]))))
+        self.add(vec2)
+        self.play(MoveAlongPath(dot, arc1), run_time=5)
         self.play(Write(tex4))
         self.wait(7)
         self.play(Uncreate(VGroup(*arc1,*dot,*tex4,*tex3,*line,*plane,*v1)))
@@ -77,19 +81,42 @@ class ConsVec(Scene):#Animation for how potential difference is constant regardl
         tex12=Tex(r"Say that $\vec{r}(t)=x(t) \hat{i}+y(t) \hat{j}+z(t) \hat{k}$ where $\vec{r}(t)$ represents our position over time",font_size=30)
         tex13=Tex(r"And say that $\vec{F}=\nabla f$ where f is the gradient function of the vector field F",font_size=30).shift(DOWN)
         self.play(Write(tex12),run_time=5)
+        self.wait(7)
         self.play(Write(tex13),run_time=5)
+        self.wait(7)
         self.play(Uncreate(VGroup(*tex8,*tex9,*tex10,*tex11)))
         self.play(tex12.animate.shift(2*UP))
         self.play(tex13.animate.shift(2*UP))
         tex14=Tex(r"Then $\int_{P} \vec{F} \cdot \vec{dr}=\int_{P} (\nabla f) \cdot \vec{dr}$",font_size=30)
         self.play(Write(tex14,run_time=3))
+        self.wait(7)
         tex15=Tex(r"=$\int_{a}^{b} \nabla f(\vec{r}(t)) \cdot \vec{r}'(t) dt$",font_size=30).shift(DOWN)
         self.play(Write(tex15,run_time=3))
+        self.wait(7)
         tex16=Tex(r"=$\int_{a}^{b} (\frac{\partial f}{\partial x} \frac{dx}{dt}+\frac{\partial f}{\partial y} \frac{dy}{dt}+\frac{\partial f}{\partial z} \frac{dz}{dt}) dt$",font_size=30).shift(2*DOWN)
         self.play(FadeIn(tex16,run_time=3))
+        self.wait(10)
         tex17=Tex(r"=$\int_{a}^{b} (\frac{\partial f}{\partial x} \frac{dx}{dt}+\frac{\partial f}{\partial y} \frac{dy}{dt}+\frac{\partial f}{\partial z} \frac{dz}{dt})dt=\int_{a}^{b} \frac{d}{dt}[f(\vec{r}(t))] dt=f(\vec{r}(b))-f(\vec{r}(a))$",font_size=30).shift(3*DOWN)
         self.play(Write(tex17,run_time=3))
+        self.wait(15)
 
+class TevinProblem(Scene):
+    def construct(self):
+        plane=NumberPlane()
+        self.add(plane)
+        tev = ImageMobject("assets/tevin.png").scale(0.1).shift(RIGHT)
+        twice = ImageMobject("assets/twice.png").scale(0.1).shift(LEFT)
+        origin = Dot(np.array([0,0,0]))
+        self.add(origin)
+        for i in range(-7,7):
+            for j in range(-3,3):
+                if ((i==1 and j==0)or(i==-1 and j==0) or (i==0 and j==0)):
+                    continue
+                mag = (math.sqrt(i*i+j*j))**3
+                vec = Vector(np.array([-2*i/mag,-2*j/mag]),color=YELLOW).move_to(np.array([i-i/mag,j-j/mag,0]))
+                self.add(vec)
+        self.add(tev)
+        self.add(twice)
 
 
 class Multi(Scene):
